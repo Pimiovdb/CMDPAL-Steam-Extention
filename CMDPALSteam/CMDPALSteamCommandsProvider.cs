@@ -14,7 +14,7 @@ public partial class CMDPALSteamCommandsProvider : CommandProvider
     public CMDPALSteamCommandsProvider()
     {
         DisplayName = "Steam for CMDPAL";
-        Icon = IconHelpers.FromRelativePath("Assets\\StoreLogo.png");
+        Icon = new IconInfo("\uE753");
         _commands = [
             new CommandItem(new CMDPALSteamPage()) { Title = DisplayName },
         ];

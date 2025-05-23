@@ -19,7 +19,7 @@ namespace CMDPALSteam.Pages
             _SteamID = SteamID;
 
             Title = "Search Steam";
-            Icon = IconHelpers.FromRelativePath("Assets\\StoreLogo.png");
+            Icon = new IconInfo("\uE753");
         }
 
         public override IListItem[] GetItems() => _items.ToArray();

@@ -19,7 +19,7 @@ internal sealed partial class CMDPALSteamPage : ListPage
     private readonly Settings _settings;
     public CMDPALSteamPage()
     {
-        Icon = IconHelpers.FromRelativePath("Assets\\StoreLogo.png");
+        Icon = new IconInfo("\uE753");
         Title = "Steam for CMDPAL";
         Name = "Open";
 
