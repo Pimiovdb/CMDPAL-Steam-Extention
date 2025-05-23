@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "CMDPALSteam (Package)": {
+      "commandName": "MsixPackage",
+      "doNotLaunchApp": true
+    },
+    "CMDPALSteam (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
