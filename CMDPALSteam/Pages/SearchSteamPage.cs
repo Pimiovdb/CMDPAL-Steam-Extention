@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.CommandPalette.Extensions;
 using Microsoft.CommandPalette.Extensions.Toolkit;
+using CMDPALSteam.Services;
+using Windows.Media.AppBroadcasting;
 
 namespace CMDPALSteam.Pages
 {
@@ -20,34 +22,77 @@ namespace CMDPALSteam.Pages
 
             Title = "Search Steam";
             Icon = new IconInfo("\uE753");
+
         }
 
         public override IListItem[] GetItems() => _items.ToArray();
-        public override void UpdateSearchText(string oldSearch, string newSearch) 
+        public override async void UpdateSearchText(string oldSearch, string newSearch)
         {
-            if (_APIKey == null) 
-            { 
-                string APIKey = _APIKey.Value;
-                string SteamID = _SteamID.Value;
+            var svc = new GetOwnedGames(_APIKey.Value, _SteamID.Value);
 
-                try 
+            if (string.IsNullOrEmpty(_APIKey.Value))
+            {
+                _items = new List<IListItem>
                 {
-                    if (string.IsNullOrEmpty(APIKey))
+                    new ListItem()
                     {
-                        throw new Exception("API Key is not set.");
-                        
+                        Title = "Geen API-key ingesteld",
+                        Subtitle = "Voer een geldige API-key in om verder te gaan",
+                        Icon = new IconInfo("\uE7BA")
                     }
-                    if (string.IsNullOrEmpty(SteamID))
-                    {
-                        throw new Exception("Steam ID is not set.");
-                    }
-
-                }
-                catch (Exception ex)
+                };
+                RaiseItemsChanged(_items.Count);
+            }
+            if (string.IsNullOrEmpty(_SteamID.Value))
+            {
+                _items = new List<IListItem>
                 {
+                    new ListItem()
+                    {
+                        Title = "Geen SteamID ingesteld",
+                        Subtitle = "Voer een geldige SteamID in om verder te gaan",
+                        Icon = new IconInfo("\uE7BA")
+                    }
 
-                }
+                };
+                RaiseItemsChanged(_items.Count);
+            }
+            try
+            {
+                
+                var allGames = await svc.GetOwnedGamesAsync();
+
+                var filtered = string.IsNullOrWhiteSpace(newSearch)
+                    ? allGames
+                    : allGames.Where(g => g.name.Contains(newSearch, StringComparison.OrdinalIgnoreCase)).ToList();
+
+                _items = filtered
+                    .Select(g => (IListItem)new ListItem(
+                        new OpenUrlCommand($"https://store.steampowered.com/app/{g.appid}"))
+                    {
+                        Title = g.name,
+                        Subtitle = $"Playtime: {g.playtime_forever} min",
+                        Icon = new IconInfo($"https://media.steampowered.com/steamcommunity/public/images/apps/{g.appid}/{g.appid}_header.jpg")
+                    })
+                    .ToList();
+
+
+                RaiseItemsChanged(_items.Count);
+            }
+            catch (Exception ex)
+            {
+                _items = new List<IListItem>
+                {
+                    new ListItem()
+                    {
+                        Title = "Error: ",
+                        Subtitle = ex.Message,
+                        Icon = new IconInfo("\uE7BA")
+                    }
+                };
             }
         }
-    }
+
+    } 
 }
+

@@ -43,6 +43,12 @@ internal sealed partial class CMDPALSteamPage : ListPage
                     Title    = "Search Through Steam",
                     Subtitle = "Steam Search",
                     Icon     = new IconInfo("\uEC4A")
+                },
+                new ListItem(_settings.SettingsPage)
+                {
+                    Title    = "Settings",
+                    Subtitle = "Configure your Steam API Key and Steam ID",
+                    Icon     = new IconInfo("\uE713")
                 }
         };
     }
