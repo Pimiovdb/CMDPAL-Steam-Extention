@@ -7,6 +7,7 @@ using Microsoft.CommandPalette.Extensions;
 using Microsoft.CommandPalette.Extensions.Toolkit;
 using CMDPALSteam.Services;
 using Windows.Media.AppBroadcasting;
+using System.Diagnostics;
 
 namespace CMDPALSteam.Pages
 {
@@ -29,6 +30,7 @@ namespace CMDPALSteam.Pages
         public override async void UpdateSearchText(string oldSearch, string newSearch)
         {
             var svc = new GetOwnedGames(_APIKey.Value, _SteamID.Value);
+            var appid = 0;
 
             if (string.IsNullOrEmpty(_APIKey.Value))
             {
@@ -59,24 +61,31 @@ namespace CMDPALSteam.Pages
             }
             try
             {
-                
                 var allGames = await svc.GetOwnedGamesAsync();
 
                 var filtered = string.IsNullOrWhiteSpace(newSearch)
                     ? allGames
                     : allGames.Where(g => g.name.Contains(newSearch, StringComparison.OrdinalIgnoreCase)).ToList();
+                appid = filtered.ToArray()[0].appid;
+
 
                 _items = filtered
-                    .Select(g => (IListItem)new ListItem(
-                        new OpenUrlCommand($"https://store.steampowered.com/app/{g.appid}"))
+                    .Select(g =>
                     {
-                        Title = g.name,
-                        Subtitle = $"Playtime: {g.playtime_forever} min",
-                        Icon = new IconInfo($"https://media.steampowered.com/steamcommunity/public/images/apps/{g.appid}/{g.appid}_header.jpg")
-                    })
-                    .ToList();
-
-
+                        var launchgame = new AnonymousCommand(action: () => 
+                        { 
+                            Process.Start(new ProcessStartInfo($"steam://rungameid/{g.appid}") 
+                            { 
+                                UseShellExecute = true 
+                            }); 
+                        });
+                        return (IListItem)new ListItem(launchgame)
+                        {
+                            Title = g.name,
+                            Subtitle = $"Playtime: {g.playtime_forever} min",
+                            Icon = new IconInfo($"https://cdn.akamai.steamstatic.com/steam/apps/{g.appid}/library_600x900.jpg"),
+                        };
+                    }).ToList();
                 RaiseItemsChanged(_items.Count);
             }
             catch (Exception ex)

@@ -47,13 +47,12 @@ namespace CMDPALSteam.Services
         {
             var url = $"http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key={_apiKey}&steamid={_steamId}&format=json&include_appinfo=true";
             using var resp = await _http.GetAsync(url);
-            resp.EnsureSuccessStatusCode();
-            var json = await resp.Content.ReadAsStringAsync();
 
-            var result = JsonSerializer.Deserialize(
-                json,
-                SteamJsonContext.Default.OwnedGamesResponse
-            );
+            resp.EnsureSuccessStatusCode();
+
+            var json = await resp.Content.ReadAsStringAsync();
+            var result = JsonSerializer.Deserialize(json,SteamJsonContext.Default.OwnedGamesResponse);
+
             return result?.response?.games ?? new List<Game>();
         }
 
