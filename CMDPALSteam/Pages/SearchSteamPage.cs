@@ -30,7 +30,6 @@ namespace CMDPALSteam.Pages
         public override async void UpdateSearchText(string oldSearch, string newSearch)
         {
             var svc = new GetOwnedGames(_APIKey.Value, _SteamID.Value);
-            var appid = 0;
 
             if (string.IsNullOrEmpty(_APIKey.Value))
             {
@@ -62,28 +61,27 @@ namespace CMDPALSteam.Pages
             try
             {
                 var allGames = await svc.GetOwnedGamesAsync();
-
                 var filtered = string.IsNullOrWhiteSpace(newSearch)
                     ? allGames
-                    : allGames.Where(g => g.name.Contains(newSearch, StringComparison.OrdinalIgnoreCase)).ToList();
-                appid = filtered.ToArray()[0].appid;
-
+                    : allGames.Where(g => g.name.Contains(newSearch, StringComparison.OrdinalIgnoreCase)).OrderByDescending(g => g.playtime_forever).ToList();
 
                 _items = filtered
                     .Select(g =>
                     {
-                        var launchgame = new AnonymousCommand(action: () => 
-                        { 
-                            Process.Start(new ProcessStartInfo($"steam://rungameid/{g.appid}") 
-                            { 
-                                UseShellExecute = true 
-                            }); 
-                        });
-                        return (IListItem)new ListItem(launchgame)
+                        var launchgame = new AnonymousCommand(action: () =>
+                        {
+                            Process.Start(new ProcessStartInfo($"steam://rungameid/{g.appid}")
+                            {
+                                UseShellExecute = true
+                            });
+                        }){ Name = "Launch Game"};
+
+                        return (IListItem)new ListItem()
                         {
                             Title = g.name,
                             Subtitle = $"Playtime: {g.playtime_forever} min",
                             Icon = new IconInfo($"https://cdn.akamai.steamstatic.com/steam/apps/{g.appid}/library_600x900.jpg"),
+                            Command = launchgame
                         };
                     }).ToList();
                 RaiseItemsChanged(_items.Count);
