@@ -61,9 +61,7 @@ namespace CMDPALSteam.Pages
             try
             {
                 var allGames = await svc.GetOwnedGamesAsync();
-                var filtered = string.IsNullOrWhiteSpace(newSearch)
-                    ? allGames
-                    : allGames.Where(g => g.name.Contains(newSearch, StringComparison.OrdinalIgnoreCase)).OrderByDescending(g => g.playtime_forever).ToList();
+                var filtered = allGames.Where(g => string.IsNullOrWhiteSpace(newSearch) || g.name.Contains(newSearch, StringComparison.OrdinalIgnoreCase)).OrderByDescending(g => g.playtime_forever).ToList();
 
                 _items = filtered
                     .Select(g =>
