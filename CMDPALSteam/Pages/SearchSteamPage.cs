@@ -23,7 +23,7 @@ namespace CMDPALSteam.Pages
 
             Title = "Search Steam";
             Icon = new IconInfo("\uE753");
-
+            ShowDetails = true;
         }
 
         public override IListItem[] GetItems() => _items.ToArray();
@@ -79,7 +79,25 @@ namespace CMDPALSteam.Pages
                             Title = g.name,
                             Subtitle = $"Playtime: {g.playtime_forever} min",
                             Icon = new IconInfo($"https://cdn.akamai.steamstatic.com/steam/apps/{g.appid}/library_600x900.jpg"),
-                            Command = launchgame
+                            Command = launchgame,
+                            TextToSuggest = g.name,
+                            Tags = new Tag[]
+                            {
+                                new Tag($"AppID:{g.appid}"),
+                            },
+                            Details = new Details()
+                            {
+                                Title = g.name,
+                                Body = $"Playtime: {g.playtime_forever} min \n AppID: {g.appid}",
+                                HeroImage = new IconInfo($"https://cdn.akamai.steamstatic.com/steam/apps/{g.appid}/header.jpg")
+                            },
+                            MoreCommands = new IContextItem[] 
+                            {
+                                new CommandContextItem(new OpenUrlCommand($"https://store.steampowered.com/app/{g.appid}"))
+                                {
+                                    Title = "Open URL"
+                                }
+                            }
                         };
                     }).ToList();
                 RaiseItemsChanged(_items.Count);
